@@ -31,6 +31,26 @@ def signup():
     return render_template("signup.html")
 
 @app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if username in users and users[username] == password:
+            session["username"] = username
+            return redirect(url_for("profile"))
+        else:
+            return "Invalid username or password!"
+
+    return render_template("login.html")
+
+@app.route("/profile")
+def profile():
+    if "username" in session:
+        return f"Welcome, {session['username']}! You are dog-free and fabulous."
+    else:
+        return redirect(url_for("login"))
+
 
 
 
