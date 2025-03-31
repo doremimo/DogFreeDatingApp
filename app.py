@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
 app = Flask(__name__)
@@ -23,7 +24,8 @@ def signup():
         try:
             conn = sqlite3.connect("users.db")
             c = conn.cursor()
-            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+            hashed_password = generate_password_hash(password)
+            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
             conn.commit()
             conn.close()
             return redirect(url_for("login"))
@@ -46,7 +48,7 @@ def login():
         result = c.fetchone()
         conn.close()
 
-        if result and result[0] == password:
+        if result and check_password_hash(result[0], password):
             session["username"] = username
             return redirect(url_for("profile"))
 
@@ -61,7 +63,37 @@ def profile():
         return render_template("profile.html", username=session["username"])
     else:
         return redirect(url_for("login"))
-    
+
+
+@app.route("/browse")
+def browse():
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("SELECT username FROM users WHERE username != ?", (session["username"],))
+    users = c.fetchall()
+    conn.close()
+
+    return render_template("browse.html", users=users)
+
+@app.route("/report/<username>", methods=["POST"])
+def report(username):
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    reporter = session["username"]
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("INSERT INTO reports (reported_user, reporter) VALUES (?, ?)", (username, reporter))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("browse"))
+
+
 @app.route("/logout")
 def logout():
     session.pop("username", None)

@@ -13,5 +13,14 @@ c.execute("""
         )
 """)
 
+# Create a table to store reports
+c.execute("""
+    CREATE TABLE IF NOT EXISTS reports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        reported_user TEXT NOT NULL,
+        reporter TEXT NOT NULL
+        )
+""")
+
 conn.commit()
 conn.close()
