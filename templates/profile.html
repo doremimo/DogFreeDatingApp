@@ -9,8 +9,14 @@
     <div class="container mt-5" style="max-width: 600px;">
         <div class="card shadow">
             <div class="card-body">
-                <h2 class="card-title text-center mb-4">Welcome, {{ username }}!</h2>
-                <p class="card-text"><strong>Why I’m dog-free:</strong><br>{{ reason }}</p>
+                <h2 class="card-title text-center mb-4">{{ display_name or username }}</h2>
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Age:</strong> {{ age or "Not provided" }}</li>
+                    <li class="list-group-item"><strong>Location:</strong> {{ location or "Not provided" }}</li>
+                    <li class="list-group-item"><strong>Favorite Animal:</strong> {{ favorite_animal or "Not provided" }}</li>
+                    <li class="list-group-item"><strong>Why I’m dog-free:</strong><br>{{ dog_free_reason or "Not specified." }}</li>
+                </ul>
 
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{{ url_for('browse') }}" class="btn btn-outline-primary">Browse Users</a>
@@ -21,3 +27,4 @@
     </div>
 </body>
 </html>
+

@@ -10,6 +10,10 @@ c.execute("""
         if INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
+        display_name TEXT,
+        age INTEGER,
+        location TEXT,
+        favorite_animal TEXT,
         dog_free_reason TEXT
         )
 """)
