@@ -10,7 +10,8 @@
     <ul>
       {% for user in users %}
         <li>
-          {{ user[0] }}
+          <strong>{{ user[0] }}</strong><br>
+          <em>{{ user[1] or "No reason provided." }}</em><br>
           <form action="{{ url_for('report', username=user[0]) }}" method="POST" style="display:inline;">
             <button type="submit">🚨 Report</button>
           </form>

@@ -9,7 +9,8 @@ c.execute("""
     CREATE TABLE IF NOT EXISTS users (
         if INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        dog_free_reason TEXT
         )
 """)
 
@@ -20,6 +21,16 @@ c.execute("""
         reported_user TEXT NOT NULL,
         reporter TEXT NOT NULL
         )
+""")
+
+# Add dog_free_reason column if it's not already there
+c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        dog_free_reason TEXT
+    )
 """)
 
 conn.commit()

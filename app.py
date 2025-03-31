@@ -24,8 +24,10 @@ def signup():
         try:
             conn = sqlite3.connect("users.db")
             c = conn.cursor()
+            dog_free_reason = request.form.get("dog_free_reason", "")
             hashed_password = generate_password_hash(password)
-            c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+            c.execute("INSERT INTO users (username, password, dog_free_reason) VALUES (?, ?, ?)",
+                      (username, hashed_password, dog_free_reason))
             conn.commit()
             conn.close()
             return redirect(url_for("login"))
@@ -60,7 +62,16 @@ def login():
 @app.route("/profile")
 def profile():
     if "username" in session:
-        return render_template("profile.html", username=session["username"])
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+        c.execute("SELECT dog_free_reason FROM users WHERE username = ?",
+                  (session["username"],))
+        result = c.fetchone()
+        conn.close()
+
+        reason = result[0] if result else "Not specified."
+        return render_template("profile.html",
+                               username=session["username"], reason=reason)
     else:
         return redirect(url_for("login"))
 
@@ -72,7 +83,8 @@ def browse():
 
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
-    c.execute("SELECT username FROM users WHERE username != ?", (session["username"],))
+    c.execute("SELECT username, dog_free_reason FROM users WHERE username != ?",
+              (session["username"],))
     users = c.fetchall()
     conn.close()
 
