@@ -211,6 +211,17 @@ def dev_login_2():
     session["username"] = "testuser2"
     return redirect(url_for("profile"))
 
+@app.route("/debug-likes")
+def debug_likes():
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("SELECT liker, liked FROM likes")
+    rows = c.fetchall()
+    conn.close()
+
+    return "<br>".join([f"{liker} liked {liked}" for liker, liked in rows])
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
