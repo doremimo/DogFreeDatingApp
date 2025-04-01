@@ -17,6 +17,9 @@ def signup():
         username = request.form["username"]
         password = request.form["password"]
         dog_free = request.form.get("dog_free")
+        bio = request.form.get("bio", "")
+        gender = request.form.get("gender", "")
+        interests = request.form.get("interests", "")
 
         if dog_free != "on":
             return "You must agree to the Dog-Free Oath."
@@ -32,9 +35,11 @@ def signup():
             hashed_password = generate_password_hash(password)
             c.execute("""
                 INSERT INTO users (
-                    username, password, display_name, age, location, favorite_animal, dog_free_reason
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (username, hashed_password, display_name, age, location, favorite_animal, dog_free_reason))
+                    username, password, display_name, age, location, favorite_animal,
+                    dog_free_reason, profile_pic, bio, gender, interests
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (username, hashed_password, display_name, age, location, favorite_animal,
+                  dog_free_reason, None, bio, gender, interests))
 
             conn.commit()
             conn.close()
@@ -73,14 +78,16 @@ def profile():
         conn = sqlite3.connect("users.db")
         c = conn.cursor()
         c.execute("""
-            SELECT display_name, age, location, favorite_animal, dog_free_reason, profile_pic
-            FROM users WHERE username = ?
+            SELECT display_name, age, location, favorite_animal,
+                   dog_free_reason, profile_pic, bio, gender, interests
+            FROM users
+            WHERE username = ?
         """, (session["username"],))
         result = c.fetchone()
         conn.close()
 
-        display_name, age, location, favorite_animal, dog_free_reason, profile_pic = (
-                result or (None, None, None, None, None, None))
+        (display_name, age, location, favorite_animal,
+         dog_free_reason, profile_pic, bio, gender, interests) = result or (None,) * 9
 
         return render_template("profile.html",
                                username=session["username"],
@@ -89,9 +96,13 @@ def profile():
                                location=location,
                                favorite_animal=favorite_animal,
                                dog_free_reason=dog_free_reason,
-                               profile_pic=profile_pic)
+                               profile_pic=profile_pic,
+                               bio=bio,
+                               gender=gender,
+                               interests=interests)
     else:
         return redirect(url_for("login"))
+
 
 
 

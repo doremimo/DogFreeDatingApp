@@ -15,7 +15,10 @@ c.execute("""
         location TEXT,
         favorite_animal TEXT,
         dog_free_reason TEXT,
-        profile_pic TEXT
+        profile_pic TEXT,
+        bio TEXT,
+        gender TEXT,
+        interests TEXT
         )
 """)
 
