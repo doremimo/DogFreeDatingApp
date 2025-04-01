@@ -24,10 +24,12 @@
                     <li class="list-group-item"><strong>Why I’m dog-free:</strong><br>{{ dog_free_reason or "Not specified." }}</li>
                 </ul>
 
-                <div class="d-flex justify-content-between mt-4">
+                <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
                     <a href="{{ url_for('browse') }}" class="btn btn-outline-primary">Browse Users</a>
+                    <a href="{{ url_for('matches') }}" class="btn btn-outline-success">💘 My Matches</a>
                     <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Log Out</a>
                 </div>
+
             </div>
         </div>
     </div>
