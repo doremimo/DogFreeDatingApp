@@ -14,11 +14,18 @@
                 {% for user in users %}
                     <div class="col-12">
                         <div class="card shadow-sm">
-                            <div class="card-body">
+                            <div class="card-body text-center">
+
+                                {% if user[6] %}
+                                    <div class="mb-3">
+                                        <img src="{{ url_for('static', filename='profilepics/' + user[6]) }}" class="img-thumbnail" style="max-width: 120px;">
+                                    </div>
+                                {% endif %}
+
                                 <h4 class="card-title">{{ user[0] or user[1] }}</h4>
                                 <h6 class="card-subtitle text-muted mb-2">@{{ user[1] }}</h6>
 
-                                <ul class="list-unstyled mb-3">
+                                <ul class="list-unstyled mb-3 text-start">
                                     <li><strong>Age:</strong> {{ user[2] or "?" }}</li>
                                     <li><strong>Location:</strong> {{ user[3] or "Unknown" }}</li>
                                     <li><strong>Favorite Animal:</strong> {{ user[4] or "Not shared" }}</li>
@@ -27,6 +34,9 @@
 
                                 <form action="{{ url_for('report', username=user[1]) }}" method="POST">
                                     <button type="submit" class="btn btn-sm btn-danger">🚨 Report</button>
+                                </form>
+                                <form action="{{ url_for('like', username=user[1]) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success">💚 Like</button>
                                 </form>
                             </div>
                         </div>
@@ -43,3 +53,4 @@
     </div>
 </body>
 </html>
+

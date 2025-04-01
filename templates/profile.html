@@ -11,6 +11,12 @@
             <div class="card-body">
                 <h2 class="card-title text-center mb-4">{{ display_name or username }}</h2>
 
+                {% if profile_pic %}
+                    <div class="text-center mb-3">
+                        <img src="{{ url_for('static', filename='profilepics/' + profile_pic) }}" class="img-thumbnail" style="max-width: 150px;">
+                    </div>
+                {% endif %}
+
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><strong>Age:</strong> {{ age or "Not provided" }}</li>
                     <li class="list-group-item"><strong>Location:</strong> {{ location or "Not provided" }}</li>

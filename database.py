@@ -7,14 +7,15 @@ c = conn.cursor()
 # Create a table for users if it doesn't already exist
 c.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        if INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         display_name TEXT,
         age INTEGER,
         location TEXT,
         favorite_animal TEXT,
-        dog_free_reason TEXT
+        dog_free_reason TEXT,
+        profile_pic TEXT
         )
 """)
 
@@ -27,13 +28,12 @@ c.execute("""
         )
 """)
 
-# Add dog_free_reason column if it's not already there
+# Table to store likes
 c.execute("""
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS likes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        dog_free_reason TEXT
+        liker TEXT NOT NULL,
+        liked TEXT NOT NULL
     )
 """)
 

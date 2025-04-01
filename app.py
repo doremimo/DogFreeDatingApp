@@ -73,13 +73,14 @@ def profile():
         conn = sqlite3.connect("users.db")
         c = conn.cursor()
         c.execute("""
-            SELECT display_name, age, location, favorite_animal, dog_free_reason
+            SELECT display_name, age, location, favorite_animal, dog_free_reason, profile_pic
             FROM users WHERE username = ?
         """, (session["username"],))
         result = c.fetchone()
         conn.close()
 
-        display_name, age, location, favorite_animal, dog_free_reason = result or (None, None, None, None, None)
+        display_name, age, location, favorite_animal, dog_free_reason, profile_pic = (
+                result or (None, None, None, None, None, None))
 
         return render_template("profile.html",
                                username=session["username"],
@@ -87,7 +88,8 @@ def profile():
                                age=age,
                                location=location,
                                favorite_animal=favorite_animal,
-                               dog_free_reason=dog_free_reason)
+                               dog_free_reason=dog_free_reason,
+                               profile_pic=profile_pic)
     else:
         return redirect(url_for("login"))
 
@@ -101,7 +103,8 @@ def browse():
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
     c.execute("""
-        SELECT display_name, username, age, location, favorite_animal, dog_free_reason
+        SELECT display_name, username, age, location, favorite_animal, 
+        dog_free_reason, profile_pic
         FROM users
         WHERE username != ?
     """, (session["username"],))
@@ -109,6 +112,29 @@ def browse():
     conn.close()
 
     return render_template("browse.html", users=users)
+
+
+@app.route("/like/<username>", methods=["POST"])
+def like(username):
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    liker = session["username"]
+    liked = username
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # Prevent duplicate likes
+    c.execute("SELECT 1 FROM likes WHERE liker = ? AND liked = ?", (liker, liked))
+    already_liked = c.fetchone()
+
+    if not already_liked:
+        c.execute("INSERT INTO likes (liker, liked) VALUES (?, ?)", (liker, liked))
+        conn.commit()
+
+    conn.close()
+    return redirect(url_for("browse"))
 
 
 @app.route("/report/<username>", methods=["POST"])
@@ -132,8 +158,11 @@ def logout():
     session.pop("username", None)
     return redirect(url_for("login"))
 
+@app.route("/dev-login")
+def dev_login():
+    # Automatically log in as a fake user
+    session["username"] = "testuser111"
+    return redirect(url_for("profile"))
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
