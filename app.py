@@ -104,7 +104,48 @@ def profile():
         return redirect(url_for("login"))
 
 
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    if "username" not in session:
+        return redirect(url_for("login"))
 
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    if request.method == "POST":
+        # Get updated data from form
+        display_name = request.form.get("display_name", "")
+        age = request.form.get("age", None)
+        location = request.form.get("location", "")
+        favorite_animal = request.form.get("favorite_animal", "")
+        dog_free_reason = request.form.get("dog_free_reason", "")
+        bio = request.form.get("bio", "")
+        gender = request.form.get("gender", "")
+        interests = request.form.get("interests", "")
+
+        # Update the database
+        c.execute("""
+                    UPDATE users SET
+                        display_name = ?, age = ?, location = ?, favorite_animal = ?,
+                        dog_free_reason = ?, bio = ?, gender = ?, interests = ?
+                    WHERE username = ?
+                """, (
+            display_name, age, location, favorite_animal,
+            dog_free_reason, bio, gender, interests,
+            session["username"]
+        ))
+        conn.commit()
+
+    # Load current user data
+    c.execute("""
+        SELECT display_name, age, location, favorite_animal,
+               dog_free_reason, bio, gender, interests
+        FROM users WHERE username = ?
+    """, (session["username"],))
+    result = c.fetchone()
+    conn.close()
+
+    return render_template("settings.html", data=result)
 
 @app.route("/browse")
 def browse():

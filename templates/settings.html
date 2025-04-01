@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5" style="max-width: 600px;">
+        <h2 class="text-center mb-4">⚙️ Update Your Profile</h2>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Display Name</label>
+                <input type="text" name="display_name" class="form-control" value="{{ data[0] or '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Age</label>
+                <input type="number" name="age" class="form-control" min="18" max="99" value="{{ data[1] or '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input type="text" name="location" class="form-control" value="{{ data[2] or '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Favorite Animal (besides dogs)</label>
+                <input type="text" name="favorite_animal" class="form-control" value="{{ data[3] or '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Why are you dog-free?</label>
+                <textarea name="dog_free_reason" class="form-control" rows="2">{{ data[4] or '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Short Bio</label>
+                <textarea name="bio" class="form-control" rows="3">{{ data[5] or '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Gender</label>
+                <input type="text" name="gender" class="form-control" value="{{ data[6] or '' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Hobbies or Interests</label>
+                <input type="text" name="interests" class="form-control" value="{{ data[7] or '' }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">💾 Save Changes</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">← Back to Profile</a>
+        </div>
+    </div>
+</body>
+</html>
