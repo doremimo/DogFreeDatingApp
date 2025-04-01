@@ -137,6 +137,43 @@ def like(username):
     return redirect(url_for("browse"))
 
 
+@app.route("/matches")
+def matches():
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    current_user = session["username"]
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # Get users who current_user liked
+    c.execute("SELECT liked FROM likes WHERE liker = ?", (current_user,))
+    liked_users = set([row[0] for row in c.fetchall()])
+
+    # Get users who liked current_user
+    c.execute("SELECT liker FROM likes WHERE liked = ?", (current_user,))
+    liked_by_users = set([row[0] for row in c.fetchall()])
+
+    # Find mutual matches
+    mutual_matches = liked_users.intersection(liked_by_users)
+
+    # Get display info for those matched users
+    if mutual_matches:
+        placeholders = ",".join("?" * len(mutual_matches))
+        c.execute(f"""
+            SELECT display_name, username, age, location, favorite_animal, dog_free_reason, profile_pic
+            FROM users WHERE username IN ({placeholders})
+        """, tuple(mutual_matches))
+        match_list = c.fetchall()
+    else:
+        match_list = []
+
+    conn.close()
+
+    return render_template("matches.html", matches=matches)
+
+
 @app.route("/report/<username>", methods=["POST"])
 def report(username):
     if "username" not in session:
