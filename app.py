@@ -171,7 +171,7 @@ def matches():
 
     conn.close()
 
-    return render_template("matches.html", matches=matches)
+    return render_template("matches.html", matches=match_list)
 
 
 @app.route("/report/<username>", methods=["POST"])
@@ -200,6 +200,17 @@ def dev_login():
     # Automatically log in as a fake user
     session["username"] = "testuser111"
     return redirect(url_for("profile"))
+
+@app.route("/dev-login-1")
+def dev_login_1():
+    session["username"] = "testuser1"
+    return redirect(url_for("profile"))
+
+@app.route("/dev-login-2")
+def dev_login_2():
+    session["username"] = "testuser2"
+    return redirect(url_for("profile"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
