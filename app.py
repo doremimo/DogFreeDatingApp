@@ -174,6 +174,39 @@ def matches():
     return render_template("matches.html", matches=match_list)
 
 
+@app.route("/messages/<username>", methods=["GET", "POST"])
+def message_thread(username):
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    current_user = session["username"]
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # Handle new message being sent
+    if request.method == "POST":
+        message = request.form["message"]
+        if message.strip():
+            c.execute("INSERT INTO messages (sender, recipient, content) VALUES (?, ?, ?)",
+                      (current_user, username, message))
+            conn.commit()
+
+    # Fetch conversation between current_user and the other user
+    c.execute("""
+        SELECT sender, content, timestamp FROM messages
+        WHERE (sender = ? AND recipient = ?)
+           OR (sender = ? AND recipient = ?)
+        ORDER BY timestamp ASC
+    """, (current_user, username, username, current_user))
+
+    messages = c.fetchall()
+    conn.close()
+
+    return render_template("messages.html", messages=messages, other_user=username)
+
+
+
 @app.route("/report/<username>", methods=["POST"])
 def report(username):
     if "username" not in session:
