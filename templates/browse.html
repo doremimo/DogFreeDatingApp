@@ -58,8 +58,10 @@
 
                                 <h4 class="card-title">{{ user[0] or user[1] }}</h4>
                                 <h6 class="card-subtitle text-muted mb-2">@{{ user[1] }}</h6>
-                                <p class="text-success small">Match Score: {{ score }}</p>
 
+                                {% if score >= 4 %}
+                                    <span class="badge bg-success mb-2">💘 High Match</span>
+                                {% endif %}
 
                                 <ul class="list-unstyled mb-3 text-start">
                                     <li><strong>Age:</strong> {{ user[2] or "?" }}</li>
