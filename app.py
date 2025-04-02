@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
@@ -109,43 +109,43 @@ def settings():
     if "username" not in session:
         return redirect(url_for("login"))
 
+    if request.method == "POST":
+        display_name = request.form.get("display_name")
+        age = request.form.get("age")
+        location = request.form.get("location")
+        favorite_animal = request.form.get("favorite_animal")
+        dog_free_reason = request.form.get("dog_free_reason")
+        bio = request.form.get("bio")
+        gender = request.form.get("gender")
+        interests = request.form.get("interests")
+
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+        c.execute("""
+            UPDATE users SET display_name=?, age=?, location=?, favorite_animal=?, 
+                            dog_free_reason=?, bio=?, gender=?, interests=? 
+            WHERE username=?
+        """, (display_name, age, location, favorite_animal, dog_free_reason,
+              bio, gender, interests, session["username"]))
+        conn.commit()
+        conn.close()
+
+        flash("Profile updated!")
+        return redirect(url_for("profile"))
+
+    # GET method: load the existing values to fill the form
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
-
-    if request.method == "POST":
-        # Get updated data from form
-        display_name = request.form.get("display_name", "")
-        age = request.form.get("age", None)
-        location = request.form.get("location", "")
-        favorite_animal = request.form.get("favorite_animal", "")
-        dog_free_reason = request.form.get("dog_free_reason", "")
-        bio = request.form.get("bio", "")
-        gender = request.form.get("gender", "")
-        interests = request.form.get("interests", "")
-
-        # Update the database
-        c.execute("""
-                    UPDATE users SET
-                        display_name = ?, age = ?, location = ?, favorite_animal = ?,
-                        dog_free_reason = ?, bio = ?, gender = ?, interests = ?
-                    WHERE username = ?
-                """, (
-            display_name, age, location, favorite_animal,
-            dog_free_reason, bio, gender, interests,
-            session["username"]
-        ))
-        conn.commit()
-
-    # Load current user data
     c.execute("""
-        SELECT display_name, age, location, favorite_animal,
-               dog_free_reason, bio, gender, interests
+        SELECT display_name, age, location, favorite_animal, dog_free_reason,
+               bio, gender, interests
         FROM users WHERE username = ?
     """, (session["username"],))
     result = c.fetchone()
     conn.close()
 
     return render_template("settings.html", data=result)
+
 
 @app.route("/browse", methods=["GET", "POST"])
 def browse():
@@ -198,7 +198,6 @@ def browse():
 
 
 
-
 @app.route("/matches")
 def matches():
     if "username" not in session:
@@ -247,13 +246,13 @@ def like(username):
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
 
-    # Prevent duplicate likes
     c.execute("SELECT 1 FROM likes WHERE liker = ? AND liked = ?", (liker, liked))
     already_liked = c.fetchone()
 
     if not already_liked:
         c.execute("INSERT INTO likes (liker, liked) VALUES (?, ?)", (liker, liked))
         conn.commit()
+        flash(f"You liked @{liked}!")
 
     conn.close()
     return redirect(url_for("browse"))
@@ -306,6 +305,7 @@ def report(username):
     conn.commit()
     conn.close()
 
+    flash(f"You reported @{username}.")
     return redirect(url_for("browse"))
 
 
