@@ -9,13 +9,47 @@
     <div class="container mt-5" style="max-width: 800px;">
         <h2 class="text-center mb-4">Dog-Free Singles Near You</h2>
 
+        <!-- 🔍 Filter Form -->
+        <form method="POST" class="mb-4 p-3 border rounded bg-light">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                    <label class="form-label">Min Age</label>
+                    <input type="number" name="min_age" class="form-control" min="18">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Max Age</label>
+                    <input type="number" name="max_age" class="form-control" max="99">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Location</label>
+                    <input type="text" name="location" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Gender</label>
+                    <select name="gender" class="form-select">
+                        <option value="">Any</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Nonbinary">Nonbinary</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Interest Keyword</label>
+                    <input type="text" name="interest" class="form-control" placeholder="Ex: music">
+                </div>
+                <div class="col-md-1 text-end">
+                    <button type="submit" class="btn btn-primary w-100">🔍</button>
+                </div>
+            </div>
+        </form>
+
         {% if users %}
             <div class="row g-4">
-                {% for user in users %}
+                {% for user, score in users %}
                     <div class="col-12">
                         <div class="card shadow-sm">
                             <div class="card-body text-center">
-
                                 {% if user[6] %}
                                     <div class="mb-3">
                                         <img src="{{ url_for('static', filename='profilepics/' + user[6]) }}" class="img-thumbnail" style="max-width: 120px;">
@@ -24,19 +58,25 @@
 
                                 <h4 class="card-title">{{ user[0] or user[1] }}</h4>
                                 <h6 class="card-subtitle text-muted mb-2">@{{ user[1] }}</h6>
+                                <p class="text-success small">Match Score: {{ score }}</p>
+
 
                                 <ul class="list-unstyled mb-3 text-start">
                                     <li><strong>Age:</strong> {{ user[2] or "?" }}</li>
                                     <li><strong>Location:</strong> {{ user[3] or "Unknown" }}</li>
                                     <li><strong>Favorite Animal:</strong> {{ user[4] or "Not shared" }}</li>
                                     <li><strong>Dog-Free Reason:</strong><br><em>{{ user[5] or "They didn’t say..." }}</em></li>
+                                    <li><strong>Bio:</strong> {{ user[7] or "" }}</li>
+                                    <li><strong>Gender:</strong> {{ user[8] or "" }}</li>
+                                    <li><strong>Interests:</strong> {{ user[9] or "" }}</li>
                                 </ul>
 
-                                <form action="{{ url_for('report', username=user[1]) }}" method="POST">
-                                    <button type="submit" class="btn btn-sm btn-danger">🚨 Report</button>
-                                </form>
                                 <form action="{{ url_for('like', username=user[1]) }}" method="POST" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-success">💚 Like</button>
+                                </form>
+
+                                <form action="{{ url_for('report', username=user[1]) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger">🚨 Report</button>
                                 </form>
                             </div>
                         </div>
@@ -44,7 +84,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="alert alert-info text-center">No other users found.</div>
+            <div class="alert alert-info text-center">No users match your filter criteria. Try adjusting your filters!</div>
         {% endif %}
 
         <div class="text-center mt-4">
@@ -53,4 +93,5 @@
     </div>
 </body>
 </html>
+
 

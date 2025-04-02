@@ -147,46 +147,56 @@ def settings():
 
     return render_template("settings.html", data=result)
 
-@app.route("/browse")
+@app.route("/browse", methods=["GET", "POST"])
 def browse():
     if "username" not in session:
         return redirect(url_for("login"))
 
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
+
+    # Get filter inputs
+    min_age = request.form.get("min_age")
+    max_age = request.form.get("max_age")
+    location_input = request.form.get("location", "").strip().lower()
+    gender_input = request.form.get("gender", "").strip().lower()
+    interest_input = request.form.get("interest", "").strip().lower()
+
+    # Fetch all other users
     c.execute("""
         SELECT display_name, username, age, location, favorite_animal, 
-        dog_free_reason, profile_pic
+               dog_free_reason, profile_pic, bio, gender, interests
         FROM users
         WHERE username != ?
     """, (session["username"],))
-    users = c.fetchall()
+    all_users = c.fetchall()
     conn.close()
 
-    return render_template("browse.html", users=users)
+    # Score each user
+    def score_user(user):
+        score = 0
+        display_name, username, age, loc, _, _, _, _, gender, interests = user
+
+        if min_age and age and int(age) >= int(min_age):
+            score += 1
+        if max_age and age and int(age) <= int(max_age):
+            score += 1
+        if location_input and loc and location_input in loc.lower():
+            score += 1
+        if gender_input and gender and gender_input == gender.lower():
+            score += 1
+        if interest_input and interests and interest_input in interests.lower():
+            score += 1
+
+        return score
+
+    # Pair users with their score and sort by score
+    scored_users = [(user, score_user(user)) for user in all_users]
+    scored_users.sort(key=lambda x: x[1], reverse=True)
+
+    return render_template("browse.html", users=scored_users)
 
 
-@app.route("/like/<username>", methods=["POST"])
-def like(username):
-    if "username" not in session:
-        return redirect(url_for("login"))
-
-    liker = session["username"]
-    liked = username
-
-    conn = sqlite3.connect("users.db")
-    c = conn.cursor()
-
-    # Prevent duplicate likes
-    c.execute("SELECT 1 FROM likes WHERE liker = ? AND liked = ?", (liker, liked))
-    already_liked = c.fetchone()
-
-    if not already_liked:
-        c.execute("INSERT INTO likes (liker, liked) VALUES (?, ?)", (liker, liked))
-        conn.commit()
-
-    conn.close()
-    return redirect(url_for("browse"))
 
 
 @app.route("/matches")
@@ -224,6 +234,30 @@ def matches():
     conn.close()
 
     return render_template("matches.html", matches=match_list)
+
+
+@app.route("/like/<username>", methods=["POST"])
+def like(username):
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    liker = session["username"]
+    liked = username
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # Prevent duplicate likes
+    c.execute("SELECT 1 FROM likes WHERE liker = ? AND liked = ?", (liker, liked))
+    already_liked = c.fetchone()
+
+    if not already_liked:
+        c.execute("INSERT INTO likes (liker, liked) VALUES (?, ?)", (liker, liked))
+        conn.commit()
+
+    conn.close()
+    return redirect(url_for("browse"))
+
 
 
 @app.route("/messages/<username>", methods=["GET", "POST"])

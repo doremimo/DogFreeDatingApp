@@ -7,55 +7,60 @@
 </head>
 <body>
     <div class="container mt-5" style="max-width: 600px;">
-        <h2 class="text-center mb-4">⚙️ Update Your Profile</h2>
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">⚙️ Update Your Profile</h2>
 
-        <form method="POST">
-            <div class="mb-3">
-                <label class="form-label">Display Name</label>
-                <input type="text" name="display_name" class="form-control" value="{{ data[0] or '' }}">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="display_name" class="form-label">Display Name</label>
+                        <input type="text" class="form-control" id="display_name" name="display_name" value="{{ data[0] or '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" value="{{ data[1] or '' }}" min="18" max="99">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" value="{{ data[2] or '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="favorite_animal" class="form-label">Favorite Animal</label>
+                        <input type="text" class="form-control" id="favorite_animal" name="favorite_animal" value="{{ data[3] or '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dog_free_reason" class="form-label">Why are you dog-free?</label>
+                        <textarea class="form-control" id="dog_free_reason" name="dog_free_reason" rows="2">{{ data[4] or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Short Bio</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="3">{{ data[5] or '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <input type="text" class="form-control" id="gender" name="gender" value="{{ data[6] or '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="interests" class="form-label">Interests (comma-separated)</label>
+                        <input type="text" class="form-control" id="interests" name="interests" value="{{ data[7] or '' }}">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Back to Profile</a>
+                </div>
             </div>
-
-            <div class="mb-3">
-                <label class="form-label">Age</label>
-                <input type="number" name="age" class="form-control" min="18" max="99" value="{{ data[1] or '' }}">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Location</label>
-                <input type="text" name="location" class="form-control" value="{{ data[2] or '' }}">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Favorite Animal (besides dogs)</label>
-                <input type="text" name="favorite_animal" class="form-control" value="{{ data[3] or '' }}">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Why are you dog-free?</label>
-                <textarea name="dog_free_reason" class="form-control" rows="2">{{ data[4] or '' }}</textarea>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Short Bio</label>
-                <textarea name="bio" class="form-control" rows="3">{{ data[5] or '' }}</textarea>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Gender</label>
-                <input type="text" name="gender" class="form-control" value="{{ data[6] or '' }}">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Hobbies or Interests</label>
-                <input type="text" name="interests" class="form-control" value="{{ data[7] or '' }}">
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">💾 Save Changes</button>
-        </form>
-
-        <div class="text-center mt-3">
-            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">← Back to Profile</a>
         </div>
     </div>
 </body>
 </html>
+
