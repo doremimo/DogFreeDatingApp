@@ -4,7 +4,6 @@ import sqlite3
 conn = sqlite3.connect("users.db")
 c = conn.cursor()
 
-# Create a table for users if it doesn't already exist
 c.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,9 +17,12 @@ c.execute("""
         profile_pic TEXT,
         bio TEXT,
         gender TEXT,
-        interests TEXT
-        )
+        interests TEXT,
+        main_tag TEXT,
+        tags TEXT
+    )
 """)
+
 
 # Create a table to store reports
 c.execute("""

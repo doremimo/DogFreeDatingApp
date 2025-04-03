@@ -40,6 +40,63 @@
                 <input type="text" id="interests" name="interests" class="form-control" placeholder="e.g. Reading, hiking, cooking">
             </div>
 
+                        <!-- 🔖 Main Tag Dropdown -->
+            <div class="mb-3">
+              <label class="form-label"><strong>Main Tag</strong></label>
+              <select class="form-select" name="main_tag" required>
+                <option value="">Choose your main tag</option>
+
+                <optgroup label="🐾 Fun & Identity Tags">
+                  <option value="Fully Pet-Free">🚫 Fully Pet-Free</option>
+                  <option value="Allergic to Everything">🤧 Allergic to Everything</option>
+                  <option value="Reptile Roomie">🐍 Reptile Roomie</option>
+                  <option value="Cat Companion">🐱 Cat Companion</option>
+                  <option value="Rodent Roomie">🐁 Rodent Roomie</option>
+                  <option value="Bird Bestie">🦜 Bird Bestie</option>
+                  <option value="Fish Friend">🐟 Fish Friend</option>
+                  <option value="Turtle Tenant">🐢 Turtle Tenant</option>
+                  <option value="Plant Person">🪴 Plant Person</option>
+                  <option value="Bug Buddy">🪳 Bug Buddy</option>
+                  <option value="My Pet’s a Vibe">👽 My Pet’s a Vibe</option>
+                  <option value="No Bark Zone">🚫 No Bark Zone</option>
+                  <option value="Clean House > Cute Paws">🧼 Clean House > Cute Paws</option>
+                </optgroup>
+
+                <optgroup label="🌱 Lifestyle & Values Tags">
+                  <option value="Child-Free">Child-Free</option>
+                  <option value="Divorced">Divorced</option>
+                  <option value="Neurodivergent">Neurodivergent</option>
+                  <option value="Creative at Heart">Creative at Heart</option>
+                  <option value="Digital Nomad">Digital Nomad</option>
+                  <option value="Career-Focused">Career-Focused</option>
+                  <option value="Just Looking for Friends">Just Looking for Friends</option>
+                  <option value="Monogamous">Monogamous</option>
+                </optgroup>
+              </select>
+            </div>
+
+
+                        <!-- ➕ Additional Tags -->
+            <div class="mb-3">
+              <label class="form-label"><strong>Additional Tags</strong> (optional)</label>
+              <div class="d-flex flex-wrap gap-2">
+
+                {% set additional_tags = [
+                  'Fully Pet-Free', 'Allergic to Everything', 'Reptile Roomie', 'Cat Companion', 'Rodent Roomie',
+                  'Bird Bestie', 'Fish Friend', 'Turtle Tenant', 'Plant Person', 'Bug Buddy', 'My Pet’s a Vibe',
+                  'No Bark Zone', 'Clean House > Cute Paws', 'Child-Free', 'Divorced', 'Neurodivergent',
+                  'Creative at Heart', 'Digital Nomad', 'Career-Focused', 'Just Looking for Friends', 'Monogamous'
+                ] %}
+
+                {% for tag in additional_tags %}
+                  <input type="checkbox" class="btn-check" name="tags" id="tag-{{ loop.index }}" value="{{ tag }}">
+                  <label class="btn btn-outline-primary btn-sm" for="tag-{{ loop.index }}">{{ tag }}</label>
+                {% endfor %}
+              </div>
+            </div>
+
+
+
             <div class="mb-3">
                 <label for="bio" class="form-label">Short Bio</label>
                 <textarea id="bio" name="bio" class="form-control" rows="3" placeholder="Write a little about yourself..."></textarea>

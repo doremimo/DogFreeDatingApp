@@ -43,6 +43,29 @@
                     <li class="list-group-item"><strong>Bio:</strong><br>{{ bio or "No bio yet." }}</li>
                 </ul>
 
+                    {% if main_tag %}
+        <div class="text-center mt-4">
+            <span class="badge bg-primary fs-5">{{ main_tag }}</span>
+        </div>
+    {% endif %}
+
+    {% if tags %}
+        <div class="text-center mt-3">
+            {% for tag in tags[:3] %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
+            {% endfor %}
+            {% if tags|length > 3 %}
+                <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#moreTags">+ More</button>
+                <div id="moreTags" class="collapse mt-2">
+                    {% for tag in tags[3:] %}
+                        <span class="badge bg-secondary me-1">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+
                 <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
                     <a href="{{ url_for('browse') }}" class="btn btn-outline-primary">Browse Users</a>
                     <a href="{{ url_for('settings') }}" class="btn btn-outline-warning">⚙️ Settings</a>
@@ -53,6 +76,9 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
 

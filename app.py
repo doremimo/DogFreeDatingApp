@@ -17,38 +17,60 @@ def signup():
         username = request.form["username"]
         password = request.form["password"]
         dog_free = request.form.get("dog_free")
-        bio = request.form.get("bio", "")
-        gender = request.form.get("gender", "")
-        interests = request.form.get("interests", "")
 
         if dog_free != "on":
             return "You must agree to the Dog-Free Oath."
 
+        # Get all form data
+        display_name = request.form.get("display_name", "")
+        age = request.form.get("age", None)
+        location = request.form.get("location", "")
+        favorite_animal = request.form.get("favorite_animal", "")
+        dog_free_reason = request.form.get("dog_free_reason", "")
+        bio = request.form.get("bio", "")
+        gender = request.form.get("gender", "")
+        interests = request.form.get("interests", "")
+        main_tag = request.form.get("main_tag", "")
+        tags = request.form.getlist("tags")
+        all_tags = [main_tag] + tags
+        tags_string = ",".join(tags)
+
+        # Validation: must include at least one pet-related tag
+        pet_tags = {
+            "Fully Pet-Free", "Allergic to Everything", "Reptile Roomie", "Cat Companion",
+            "Rodent Roomie", "Bird Bestie", "Fish Friend", "Turtle Tenant", "Plant Person",
+            "Bug Buddy", "My Pet’s a Vibe", "No Bark Zone", "Clean House > Cute Paws"
+        }
+        if not any(tag in pet_tags for tag in all_tags):
+            return "You must select at least one pet-related tag (main or additional)."
+
         try:
             conn = sqlite3.connect("users.db")
             c = conn.cursor()
-            display_name = request.form.get("display_name", "")
-            age = request.form.get("age", None)
-            location = request.form.get("location", "")
-            favorite_animal = request.form.get("favorite_animal", "")
-            dog_free_reason = request.form.get("dog_free_reason", "")
             hashed_password = generate_password_hash(password)
+
             c.execute("""
                 INSERT INTO users (
-                    username, password, display_name, age, location, favorite_animal,
-                    dog_free_reason, profile_pic, bio, gender, interests
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (username, hashed_password, display_name, age, location, favorite_animal,
-                  dog_free_reason, None, bio, gender, interests))
+                    username, password, display_name, age, location,
+                    favorite_animal, dog_free_reason, profile_pic, bio,
+                    gender, interests, main_tag, tags
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                username, hashed_password, display_name, age, location,
+                favorite_animal, dog_free_reason, "", bio, gender, interests,
+                main_tag, tags_string
+            ))
 
             conn.commit()
             conn.close()
+            flash("Account created successfully!", "success")
             return redirect(url_for("login"))
 
         except sqlite3.IntegrityError:
             return "Username already exists!"
 
     return render_template("signup.html")
+
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -79,15 +101,18 @@ def profile():
         c = conn.cursor()
         c.execute("""
             SELECT display_name, age, location, favorite_animal,
-                   dog_free_reason, profile_pic, bio, gender, interests
-            FROM users
-            WHERE username = ?
+                   dog_free_reason, profile_pic, bio, gender,
+                   interests, main_tag, tags
+            FROM users WHERE username = ?
         """, (session["username"],))
         result = c.fetchone()
         conn.close()
 
-        (display_name, age, location, favorite_animal,
-         dog_free_reason, profile_pic, bio, gender, interests) = result or (None,) * 9
+        (display_name, age, location, favorite_animal, dog_free_reason,
+         profile_pic, bio, gender, interests, main_tag, tags_string) = result or (None,) * 11
+
+        # Split tags into a list
+        tags = tags_string.split(",") if tags_string else []
 
         return render_template("profile.html",
                                username=session["username"],
@@ -99,9 +124,12 @@ def profile():
                                profile_pic=profile_pic,
                                bio=bio,
                                gender=gender,
-                               interests=interests)
+                               interests=interests,
+                               main_tag=main_tag,
+                               tags=tags)
     else:
         return redirect(url_for("login"))
+
 
 
 @app.route("/settings", methods=["GET", "POST"])
@@ -109,42 +137,61 @@ def settings():
     if "username" not in session:
         return redirect(url_for("login"))
 
-    if request.method == "POST":
-        display_name = request.form.get("display_name")
-        age = request.form.get("age")
-        location = request.form.get("location")
-        favorite_animal = request.form.get("favorite_animal")
-        dog_free_reason = request.form.get("dog_free_reason")
-        bio = request.form.get("bio")
-        gender = request.form.get("gender")
-        interests = request.form.get("interests")
-
-        conn = sqlite3.connect("users.db")
-        c = conn.cursor()
-        c.execute("""
-            UPDATE users SET display_name=?, age=?, location=?, favorite_animal=?, 
-                            dog_free_reason=?, bio=?, gender=?, interests=? 
-            WHERE username=?
-        """, (display_name, age, location, favorite_animal, dog_free_reason,
-              bio, gender, interests, session["username"]))
-        conn.commit()
-        conn.close()
-
-        flash("Profile updated!")
-        return redirect(url_for("profile"))
-
-    # GET method: load the existing values to fill the form
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
+
+    if request.method == "POST":
+        # Get updated fields from form
+        display_name = request.form.get("display_name", "")
+        age = request.form.get("age", None)
+        location = request.form.get("location", "")
+        favorite_animal = request.form.get("favorite_animal", "")
+        dog_free_reason = request.form.get("dog_free_reason", "")
+        bio = request.form.get("bio", "")
+        gender = request.form.get("gender", "")
+        interests = request.form.get("interests", "")
+        main_tag = request.form.get("main_tag", "")
+        tags = request.form.getlist("tags")
+        tags_string = ",".join(tags)
+
+        # Require at least one pet-related tag
+        pet_tags = {
+            "Fully Pet-Free", "Allergic to Everything", "Reptile Roomie", "Cat Companion",
+            "Rodent Roomie", "Bird Bestie", "Fish Friend", "Turtle Tenant", "Plant Person",
+            "Bug Buddy", "My Pet’s a Vibe", "No Bark Zone", "Clean House > Cute Paws"
+        }
+        if not any(tag in pet_tags for tag in [main_tag] + tags):
+            flash("You must select at least one pet-related tag.", "danger")
+            return redirect(url_for("settings"))
+
+        # Update user info
+        c.execute("""
+            UPDATE users SET
+                display_name = ?, age = ?, location = ?, favorite_animal = ?,
+                dog_free_reason = ?, bio = ?, gender = ?, interests = ?,
+                main_tag = ?, tags = ?
+            WHERE username = ?
+        """, (
+            display_name, age, location, favorite_animal, dog_free_reason,
+            bio, gender, interests, main_tag, tags_string, session["username"]
+        ))
+
+        conn.commit()
+        conn.close()
+        flash("Profile updated!", "success")
+        return redirect(url_for("profile"))
+
+    # If GET, load current info
     c.execute("""
         SELECT display_name, age, location, favorite_animal, dog_free_reason,
-               bio, gender, interests
+               bio, gender, interests, main_tag, tags
         FROM users WHERE username = ?
     """, (session["username"],))
-    result = c.fetchone()
+    data = c.fetchone()
     conn.close()
 
-    return render_template("settings.html", data=result)
+    return render_template("settings.html", data=data)
+
 
 
 @app.route("/browse", methods=["GET", "POST"])
@@ -165,10 +212,12 @@ def browse():
     # Fetch all other users
     c.execute("""
         SELECT display_name, username, age, location, favorite_animal, 
-               dog_free_reason, profile_pic, bio, gender, interests
+               dog_free_reason, profile_pic, bio, gender, interests,
+               main_tag, tags
         FROM users
         WHERE username != ?
     """, (session["username"],))
+
     all_users = c.fetchall()
     conn.close()
 

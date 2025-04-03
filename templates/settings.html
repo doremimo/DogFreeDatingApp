@@ -7,11 +7,11 @@
 </head>
 <body>
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="container mt-3">
-          {% for message in messages %}
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
               {{ message }}
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -19,6 +19,7 @@
         </div>
       {% endif %}
     {% endwith %}
+
 
 
     <div class="container mt-5" style="max-width: 600px;">
@@ -66,6 +67,55 @@
                         <label for="interests" class="form-label">Interests (comma-separated)</label>
                         <input type="text" class="form-control" id="interests" name="interests" value="{{ data[7] or '' }}">
                     </div>
+
+                                        <!-- 🔖 Main Tag -->
+                    <div class="mb-3">
+                      <label for="main_tag" class="form-label"><strong>Main Tag</strong></label>
+                      <select name="main_tag" id="main_tag" class="form-select" required>
+                        <option value="">Choose your main tag</option>
+
+                        <optgroup label="🐾 Fun & Identity Tags">
+                          {% set fun_tags = [
+                            "Reptile Roomie", "Cat Companion", "Rodent Roomie", "Bird Bestie",
+                            "Fish Friend", "Turtle Tenant", "Plant Person", "Bug Buddy",
+                            "My Pet’s a Vibe", "No Bark Zone", "Clean House > Cute Paws",
+                            "Fully Pet-Free", "Allergic to Everything"
+                          ] %}
+                          {% for tag in fun_tags %}
+                            <option value="{{ tag }}" {% if data[8] == tag %}selected{% endif %}>{{ tag }}</option>
+                          {% endfor %}
+                        </optgroup>
+
+                        <optgroup label="🌱 Lifestyle & Values Tags">
+                          {% set serious_tags = [
+                            "Child-Free", "Divorced", "Neurodivergent", "Creative at Heart",
+                            "Digital Nomad", "Career-Focused", "Just Looking for Friends", "Monogamous"
+                          ] %}
+                          {% for tag in serious_tags %}
+                            <option value="{{ tag }}" {% if data[8] == tag %}selected{% endif %}>{{ tag }}</option>
+                          {% endfor %}
+                        </optgroup>
+                      </select>
+                    </div>
+
+                    <!-- ➕ Additional Tags -->
+                    <div class="mb-3">
+                      <label class="form-label"><strong>Other Tags (Optional)</strong></label>
+                      <div class="row">
+                        {% set selected_tags = data[9].split(",") if data[9] else [] %}
+
+                        {% for tag in fun_tags + serious_tags if tag != data[8] %}
+                          <div class="col-6 col-md-4">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" name="tags" value="{{ tag }}"
+                                {% if tag in selected_tags %}checked{% endif %}>
+                              <label class="form-check-label">{{ tag }}</label>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+
 
                     <button type="submit" class="btn btn-primary w-100">Save Changes</button>
                 </form>
