@@ -7,7 +7,6 @@
 </head>
 <body>
 
-
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <div class="container mt-3">
@@ -21,17 +20,15 @@
       {% endif %}
     {% endwith %}
 
-
     <div class="container mt-5" style="max-width: 600px;">
         <div class="card shadow">
             <div class="card-body">
                 <h2 class="card-title text-center mb-4">{{ display_name or username }}</h2>
 
-                {% if profile_pic %}
-                    <div class="text-center mb-3">
-                        <img src="{{ url_for('static', filename='profilepics/' + profile_pic) }}" class="img-thumbnail" style="max-width: 150px;">
-                    </div>
-                {% endif %}
+                <div class="text-center mb-3">
+                    <img src="{{ url_for('static', filename=user.get('profile_pic') or 'profilepics/default_profile_pic.png') }}"
+                         alt="Profile Picture" class="img-thumbnail" style="max-width: 150px;">
+                </div>
 
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><strong>Age:</strong> {{ age or "Not provided" }}</li>
@@ -43,28 +40,27 @@
                     <li class="list-group-item"><strong>Bio:</strong><br>{{ bio or "No bio yet." }}</li>
                 </ul>
 
-                    {% if main_tag %}
-        <div class="text-center mt-4">
-            <span class="badge bg-primary fs-5">{{ main_tag }}</span>
-        </div>
-    {% endif %}
+                {% if main_tag %}
+                    <div class="text-center mt-4">
+                        <span class="badge bg-primary fs-5">{{ main_tag }}</span>
+                    </div>
+                {% endif %}
 
-    {% if tags %}
-        <div class="text-center mt-3">
-            {% for tag in tags[:3] %}
-                <span class="badge bg-secondary me-1">{{ tag }}</span>
-            {% endfor %}
-            {% if tags|length > 3 %}
-                <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#moreTags">+ More</button>
-                <div id="moreTags" class="collapse mt-2">
-                    {% for tag in tags[3:] %}
-                        <span class="badge bg-secondary me-1">{{ tag }}</span>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-    {% endif %}
-
+                {% if tags %}
+                    <div class="text-center mt-3">
+                        {% for tag in tags[:3] %}
+                            <span class="badge bg-secondary me-1">{{ tag }}</span>
+                        {% endfor %}
+                        {% if tags|length > 3 %}
+                            <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#moreTags">+ More</button>
+                            <div id="moreTags" class="collapse mt-2">
+                                {% for tag in tags[3:] %}
+                                    <span class="badge bg-secondary me-1">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
 
                 <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
                     <a href="{{ url_for('browse') }}" class="btn btn-outline-primary">Browse Users</a>
@@ -81,4 +77,5 @@
 
 </body>
 </html>
+
 

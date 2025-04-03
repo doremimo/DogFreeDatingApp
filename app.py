@@ -97,25 +97,36 @@ def login():
 @app.route("/profile")
 def profile():
     if "username" in session:
+        username = session["username"]
+
         conn = sqlite3.connect("users.db")
         c = conn.cursor()
+
+        # 🧠 Get profile data
         c.execute("""
             SELECT display_name, age, location, favorite_animal,
                    dog_free_reason, profile_pic, bio, gender,
                    interests, main_tag, tags
             FROM users WHERE username = ?
-        """, (session["username"],))
+        """, (username,))
         result = c.fetchone()
+
+        # ✅ Get count of unread messages
+        c.execute("""
+            SELECT COUNT(*) FROM messages 
+            WHERE recipient = ? AND is_read = 0
+        """, (username,))
+        unread_count = c.fetchone()[0]
+
         conn.close()
 
         (display_name, age, location, favorite_animal, dog_free_reason,
          profile_pic, bio, gender, interests, main_tag, tags_string) = result or (None,) * 11
 
-        # Split tags into a list
         tags = tags_string.split(",") if tags_string else []
 
         return render_template("profile.html",
-                               username=session["username"],
+                               username=username,
                                display_name=display_name,
                                age=age,
                                location=location,
@@ -126,9 +137,11 @@ def profile():
                                gender=gender,
                                interests=interests,
                                main_tag=main_tag,
-                               tags=tags)
+                               tags=tags,
+                               unread_count=unread_count)
     else:
         return redirect(url_for("login"))
+
 
 
 
@@ -345,6 +358,13 @@ def message_thread(username):
             c.execute("INSERT INTO messages (sender, recipient, content) VALUES (?, ?, ?)",
                       (current_user, username, message))
             conn.commit()
+
+    # Mark message from the other user as read
+    c.execute("""
+        UPDATE messages
+        SET is_read = 1
+        WHERE sender = ? AND recipient = ? AND is_read = 0
+    """), (username, current_user)
 
     # Fetch conversation between current_user and the other user
     c.execute("""

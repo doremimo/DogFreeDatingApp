@@ -23,6 +23,21 @@ c.execute("""
     )
 """)
 
+# Add new columns to store up to 5 gallery image paths
+new_columns = [
+    "gallery_image_1 TEXT",
+    "gallery_image_2 TEXT",
+    "gallery_image_3 TEXT",
+    "gallery_image_4 TEXT",
+    "gallery_image_5 TEXT"
+]
+
+for col in new_columns:
+    try:
+        c.execute(f"ALTER TABLE users ADD COLUMN {col}")
+    except sqlite3.OperationalError:
+        # Column might already exist if re-run
+        print(f"Column already exists for error adding: {col}")
 
 # Create a table to store reports
 c.execute("""
@@ -49,7 +64,8 @@ c.execute("""
         sender TEXT NOT NULL,
         recipient TEXT NOT NULL,
         content TEXT NOT NULL,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        is_read INTEGER DEFAULT 0
     )
 """)
 
