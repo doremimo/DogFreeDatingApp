@@ -210,8 +210,8 @@ def browse():
     interest_input = request.form.get("interest", "").strip().lower()
 
     # Get preferred tags from input
-    preferred_tags = request.form.get("preferred_tags", "").strip().lower().split(",")
-    preferred_tags = [tag.strip() for tag in preferred_tags if tag.strip()]
+    preferred_tags = request.form.getlist("preferred_tags")
+    preferred_tags = [tag.strip().lower() for tag in preferred_tags if tag.strip()]
 
     # Fetch all other users
     c.execute("""
