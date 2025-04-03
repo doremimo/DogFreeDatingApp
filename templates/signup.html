@@ -47,30 +47,45 @@
                 <option value="">Choose your main tag</option>
 
                 <optgroup label="🐾 Fun & Identity Tags">
-                  <option value="Fully Pet-Free">🚫 Fully Pet-Free</option>
-                  <option value="Allergic to Everything">🤧 Allergic to Everything</option>
                   <option value="Reptile Roomie">🐍 Reptile Roomie</option>
-                  <option value="Cat Companion">🐱 Cat Companion</option>
-                  <option value="Rodent Roomie">🐁 Rodent Roomie</option>
-                  <option value="Bird Bestie">🦜 Bird Bestie</option>
-                  <option value="Fish Friend">🐟 Fish Friend</option>
-                  <option value="Turtle Tenant">🐢 Turtle Tenant</option>
-                  <option value="Plant Person">🪴 Plant Person</option>
-                  <option value="Bug Buddy">🪳 Bug Buddy</option>
-                  <option value="My Pet’s a Vibe">👽 My Pet’s a Vibe</option>
-                  <option value="No Bark Zone">🚫 No Bark Zone</option>
-                  <option value="Clean House > Cute Paws">🧼 Clean House > Cute Paws</option>
+                    <option value="Cat Companion">🐱 Cat Companion</option>
+                    <option value="Rodent Roomie">🐁 Rodent Roomie</option>
+                    <option value="Bird Bestie">🦜 Bird Bestie</option>
+                    <option value="Fish Friend">🐟 Fish Friend</option>
+                    <option value="Turtle Tenant">🐢 Turtle Tenant</option>
+                    <option value="Plant Person">🪴 Plant Person</option>
+                    <option value="Bug Buddy">🪳 Bug Buddy</option>
+                    <option value="My Pet’s a Vibe">👽 My Pet’s a Vibe</option>
+                    <option value="No Bark Zone">🚫 No Bark Zone</option>
+                    <option value="Clean House > Cute Paws">🧼 Clean House > Cute Paws</option>
+                    <option value="Fully Pet-Free">🚫 Fully Pet-Free</option>
+                    <option value="Allergic to Everything">🤧 Allergic to Everything</option>
+                    <option value="Hates Loud Noises">🧻 Hates Loud Noises</option>
+                    <option value="Hates Loud Noises">🧻 Hates Loud Noises</option>
+                    <option value="Bed is Sacred">😴 Bed is Sacred</option>
+                    <option value="No Dog Hair, No Cry">🐶 No Dog Hair, No Cry</option>
+                    <option value="Not Here for Doggy Breath">🚷 Not Here for Doggy Breath</option>
+                    <option value="My Couch > Your Dog">🛋️ My Couch > Your Dog</option>
+                    <option value="Cat Yes, Dog No">🐱 Cat Yes, Dog No</option>
+                    <option value="Slo-Mo Pets Only">🐢 Slo-Mo Pets Only</option>
+                    <option value="Don't Judge My Pet Cockroach">Don’t Judge My Pet Cockroach</option>
+                    <option value="Lizard Liker">🦎 Lizard Liker</option>
                 </optgroup>
 
                 <optgroup label="🌱 Lifestyle & Values Tags">
-                  <option value="Child-Free">Child-Free</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Neurodivergent">Neurodivergent</option>
-                  <option value="Creative at Heart">Creative at Heart</option>
-                  <option value="Digital Nomad">Digital Nomad</option>
-                  <option value="Career-Focused">Career-Focused</option>
-                  <option value="Just Looking for Friends">Just Looking for Friends</option>
-                  <option value="Monogamous">Monogamous</option>
+                    <option value="Child-Free">Child-Free</option>
+                    <option value="Single Parent">Single Parent</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Parent (Don't live with kids)">Parent (Don't live with kids)</option>
+                    <option value="Parent (Kids part-time)">Parent (Kids part-time)</option>
+                    <option value="Open to Kids">Open to Kids</option>
+                    <option value="Neurodivergent">Neurodivergent</option>
+                    <option value="Creative at Heart">Creative at Heart</option>
+                    <option value="Digital Nomad">Digital Nomad</option>
+                    <option value="Career-Focused">Career-Focused</option>
+                    <option value="Just Looking for Friends">Just Looking for Friends</option>
+                    <option value="Monogamous">Monogamous</option>
+                    <option value="Open to ENM">Open to ENM</option>
                 </optgroup>
               </select>
             </div>
@@ -82,10 +97,14 @@
               <div class="d-flex flex-wrap gap-2">
 
                 {% set additional_tags = [
-                  'Fully Pet-Free', 'Allergic to Everything', 'Reptile Roomie', 'Cat Companion', 'Rodent Roomie',
-                  'Bird Bestie', 'Fish Friend', 'Turtle Tenant', 'Plant Person', 'Bug Buddy', 'My Pet’s a Vibe',
-                  'No Bark Zone', 'Clean House > Cute Paws', 'Child-Free', 'Divorced', 'Neurodivergent',
-                  'Creative at Heart', 'Digital Nomad', 'Career-Focused', 'Just Looking for Friends', 'Monogamous'
+                  "Reptile Roomie", "Cat Companion", "Rodent Roomie", "Bird Bestie",
+                  "Fish Friend", "Turtle Tenant", "Plant Person", "Bug Buddy",
+                  "My Pet’s a Vibe", "No Bark Zone", "Hates Loud Noises", "Bed is Sacred",
+                  "No Dog Hair, No Cry", "Not Here for Doggy Breath", "My Couch > Your Dog", "Cat Yes, Dog No",
+                  "Slo-Mo Pets Only", "Don’t Judge My Pet Cockroach", "Lizard Liker", "Clean House > Cute Paws",
+                  "Fully Pet-Free", "Allergic to Everything", "Child-Free", "Divorced", "Single Parent", "Parent (Don't live with kids)",
+                  "Parent (Kids part-time)", "Open to Kids", "Neurodivergent", "Creative at Heart",
+                  "Digital Nomad", "Career-Focused", "Just Looking for Friends", "Monogamous", "Open to ENM"
                 ] %}
 
                 {% for tag in additional_tags %}

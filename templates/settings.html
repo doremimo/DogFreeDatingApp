@@ -78,7 +78,9 @@
                           {% set fun_tags = [
                             "Reptile Roomie", "Cat Companion", "Rodent Roomie", "Bird Bestie",
                             "Fish Friend", "Turtle Tenant", "Plant Person", "Bug Buddy",
-                            "My Pet’s a Vibe", "No Bark Zone", "Clean House > Cute Paws",
+                            "My Pet’s a Vibe", "No Bark Zone", "Hates Loud Noises", "Bed is Sacred",
+                            "No Dog Hair, No Cry", "Not Here for Doggy Breath", "My Couch > Your Dog", "Cat Yes, Dog No",
+                            "Slo-Mo Pets Only", "Don’t Judge My Pet Cockroach", "Lizard Liker", "Clean House > Cute Paws",
                             "Fully Pet-Free", "Allergic to Everything"
                           ] %}
                           {% for tag in fun_tags %}
@@ -89,7 +91,7 @@
                         <optgroup label="🌱 Lifestyle & Values Tags">
                           {% set serious_tags = [
                             "Child-Free", "Divorced", "Single Parent", "Parent (Don't live with kids)", "Parent (Kids part-time)", "Open to Kids", "Neurodivergent", "Creative at Heart",
-                            "Digital Nomad", "Career-Focused", "Just Looking for Friends", "Monogamous"
+                            "Digital Nomad", "Career-Focused", "Just Looking for Friends", "Monogamous", "Open to ENM"
                           ] %}
                           {% for tag in serious_tags %}
                             <option value="{{ tag }}" {% if data[8] == tag %}selected{% endif %}>{{ tag }}</option>
