@@ -209,9 +209,12 @@ def browse():
     gender_input = request.form.get("gender", "").strip().lower()
     interest_input = request.form.get("interest", "").strip().lower()
 
-    # Get preferred tags from input
+    # Get preferred and dealbreaker tags from input
     preferred_tags = request.form.getlist("preferred_tags")
     preferred_tags = [tag.strip().lower() for tag in preferred_tags if tag.strip()]
+
+    dealbreaker_tags = request.form.getlist("dealbreaker_tags")
+    dealbreaker_tags = [tag.strip().lower() for tag in dealbreaker_tags if tag.strip()]
 
     # Fetch all other users
     c.execute("""
@@ -241,14 +244,22 @@ def browse():
 
         user_tags = tags_str.lower().split(",") if tags_str else []
 
+        # 🚫 Exclude users with dealbreaker tags
+        if any(tag in user_tags for tag in dealbreaker_tags):
+            return -1
+
+        # ✅ Add score for matching preferred tags
         for tag in preferred_tags:
             if tag in user_tags:
                 score += 1
 
         return score
 
-    # Pair users with their score and sort by score
-    scored_users = [(user, score_user(user)) for user in all_users]
+    # Pair users with their score and sort by best match
+    scored_users = [
+        (user, score) for user in all_users
+        if (score := score_user(user)) >= 0
+    ]
     scored_users.sort(key=lambda x: x[1], reverse=True)
 
     return render_template("browse.html", users=scored_users)
