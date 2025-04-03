@@ -54,6 +54,12 @@
                     <label class="form-label">Interest Keyword</label>
                     <input type="text" name="interest" class="form-control" placeholder="Ex: music">
                 </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Preferred Tags</label>
+                  <input type="text" name="preferred_tags" class="form-control" placeholder="Ex: Fully Pet-Free, Reptile Roomie">
+                </div>
+
                 <div class="col-md-1 text-end">
                     <button type="submit" class="btn btn-primary w-100">🔍</button>
                 </div>
@@ -74,6 +80,8 @@
 
                                 <h4 class="card-title">{{ user[0] or user[1] }}</h4>
                                 <h6 class="card-subtitle text-muted mb-2">@{{ user[1] }}</h6>
+
+
 
                                                                 <!-- 🔖 Main Tag -->
                                 {% if user[10] %}

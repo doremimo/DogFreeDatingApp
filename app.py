@@ -209,22 +209,24 @@ def browse():
     gender_input = request.form.get("gender", "").strip().lower()
     interest_input = request.form.get("interest", "").strip().lower()
 
+    # Get preferred tags from input
+    preferred_tags = request.form.get("preferred_tags", "").strip().lower().split(",")
+    preferred_tags = [tag.strip() for tag in preferred_tags if tag.strip()]
+
     # Fetch all other users
     c.execute("""
         SELECT display_name, username, age, location, favorite_animal, 
-               dog_free_reason, profile_pic, bio, gender, interests,
-               main_tag, tags
+               dog_free_reason, profile_pic, bio, gender, interests, main_tag, tags
         FROM users
         WHERE username != ?
     """, (session["username"],))
-
     all_users = c.fetchall()
     conn.close()
 
     # Score each user
     def score_user(user):
         score = 0
-        display_name, username, age, loc, _, _, _, _, gender, interests = user
+        display_name, username, age, loc, _, _, _, _, gender, interests, _, tags_str = user
 
         if min_age and age and int(age) >= int(min_age):
             score += 1
@@ -237,6 +239,12 @@ def browse():
         if interest_input and interests and interest_input in interests.lower():
             score += 1
 
+        user_tags = tags_str.lower().split(",") if tags_str else []
+
+        for tag in preferred_tags:
+            if tag in user_tags:
+                score += 1
+
         return score
 
     # Pair users with their score and sort by score
@@ -244,6 +252,7 @@ def browse():
     scored_users.sort(key=lambda x: x[1], reverse=True)
 
     return render_template("browse.html", users=scored_users)
+
 
 
 
