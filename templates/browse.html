@@ -192,13 +192,20 @@
                                     <li><strong>Interests:</strong> {{ user[9] or "" }}</li>
                                 </ul>
 
-                                <form action="{{ url_for('like', username=user[1]) }}" method="POST" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-success">💚 Like</button>
-                                </form>
+                                <div class="d-flex justify-content-center flex-wrap gap-2">
+                                    <form action="{{ url_for('like', username=user[1]) }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-success">💚 Like</button>
+                                    </form>
 
-                                <form action="{{ url_for('report', username=user[1]) }}" method="POST" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-danger">🚨 Report</button>
-                                </form>
+                                    <form action="{{ url_for('report', username=user[1]) }}" method="POST">
+                                        <button type="submit" class="btn btn-sm btn-danger">🚨 Report</button>
+                                    </form>
+
+                                    <a href="{{ url_for('view_user_profile', username=user[1]) }}" class="btn btn-sm btn-outline-primary">
+                                        🔍 View Profile
+                                    </a>
+                                </div>
+
                             </div>
                         </div>
                     </div>

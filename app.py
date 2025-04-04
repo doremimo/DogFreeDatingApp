@@ -337,6 +337,51 @@ def browse():
 
     return render_template("browse.html", users=scored_users)
 
+@app.route("/user/<username>")
+def view_user_profile(username):
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # Get user info
+    c.execute("""
+        SELECT display_name, age, location, favorite_animal,
+               dog_free_reason, profile_pic, bio, gender,
+               interests, main_tag, tags,
+               gallery_image_1, gallery_image_2, gallery_image_3,
+               gallery_image_4, gallery_image_5
+        FROM users WHERE username = ?
+    """, (username,))
+    result = c.fetchone()
+    conn.close()
+
+    if not result:
+        flash("User not found.", "danger")
+        return redirect(url_for("browse"))
+
+    (display_name, age, location, favorite_animal, dog_free_reason,
+     profile_pic, bio, gender, interests, main_tag, tags_string,
+     g1, g2, g3, g4, g5) = result or (None,) * 16
+
+    gallery_images = [g for g in [g1, g2, g3, g4, g5] if g]
+    tags = tags_string.split(",") if tags_string else []
+
+    return render_template("public_profile.html",
+                           username=username,
+                           display_name=display_name,
+                           age=age,
+                           location=location,
+                           favorite_animal=favorite_animal,
+                           dog_free_reason=dog_free_reason,
+                           profile_pic=profile_pic,
+                           bio=bio,
+                           gender=gender,
+                           interests=interests,
+                           main_tag=main_tag,
+                           tags=tags,
+                           gallery_images=gallery_images)
 
 
 
