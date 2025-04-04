@@ -26,7 +26,7 @@
                 <h2 class="card-title text-center mb-4">{{ display_name or username }}</h2>
 
                 <div class="text-center mb-3">
-                    <img src="{{ url_for('static', filename=user.get('profile_pic') or 'profilepics/default_profile_pic.png') }}"
+                    <img src="{{ url_for('static', filename=profile_pic or 'profilepics/default_profile_pic.png') }}"
                          alt="Profile Picture" class="img-thumbnail" style="max-width: 150px;">
                 </div>
 
@@ -39,6 +39,32 @@
                     <li class="list-group-item"><strong>Interests:</strong> {{ interests or "Not shared" }}</li>
                     <li class="list-group-item"><strong>Bio:</strong><br>{{ bio or "No bio yet." }}</li>
                 </ul>
+
+                {% if gallery_images %}
+                    <div id="galleryCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in gallery_images %}
+                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                <img src="{{ url_for('static', filename=image) }}" class="d-block w-100 rounded" style="max-height: 400px; object-fit: cover;" alt="Gallery Photo">
+                                <form action="{{ url_for('delete_gallery_image', index=loop.index) }}" method="POST" class="text-center mt-2">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Delete This Photo</button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                    {% endif %}
+
+
+
 
                 {% if main_tag %}
                     <div class="text-center mt-4">

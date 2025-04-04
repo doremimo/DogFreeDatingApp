@@ -1,5 +1,7 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import sqlite3
 
 app = Flask(__name__)
@@ -106,7 +108,9 @@ def profile():
         c.execute("""
             SELECT display_name, age, location, favorite_animal,
                    dog_free_reason, profile_pic, bio, gender,
-                   interests, main_tag, tags
+                   interests, main_tag, tags,
+                   gallery_image_1, gallery_image_2, gallery_image_3,
+                   gallery_image_4, gallery_image_5
             FROM users WHERE username = ?
         """, (username,))
         result = c.fetchone()
@@ -121,7 +125,10 @@ def profile():
         conn.close()
 
         (display_name, age, location, favorite_animal, dog_free_reason,
-         profile_pic, bio, gender, interests, main_tag, tags_string) = result or (None,) * 11
+         profile_pic, bio, gender, interests, main_tag, tags_string,
+         g1, g2, g3, g4, g5) = result or (None,) * 16
+
+        gallery_images = [g for g in [g1, g2, g3, g4, g5] if g]
 
         tags = tags_string.split(",") if tags_string else []
 
@@ -138,23 +145,32 @@ def profile():
                                interests=interests,
                                main_tag=main_tag,
                                tags=tags,
-                               unread_count=unread_count)
+                               unread_count=unread_count,
+                               gallery_images=gallery_images)
     else:
         return redirect(url_for("login"))
 
 
+# Upload up to 5 Pictures
+UPLOAD_FOLDER = 'static/gallery/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
     if "username" not in session:
         return redirect(url_for("login"))
 
+    username = session["username"]
     conn = sqlite3.connect("users.db")
     c = conn.cursor()
 
     if request.method == "POST":
-        # Get updated fields from form
+        # === Text fields ===
         display_name = request.form.get("display_name", "")
         age = request.form.get("age", None)
         location = request.form.get("location", "")
@@ -167,7 +183,7 @@ def settings():
         tags = request.form.getlist("tags")
         tags_string = ",".join(tags)
 
-        # Require at least one pet-related tag
+        # Pet tag validation
         pet_tags = {
             "Fully Pet-Free", "Allergic to Everything", "Reptile Roomie", "Cat Companion",
             "Rodent Roomie", "Bird Bestie", "Fish Friend", "Turtle Tenant", "Plant Person",
@@ -177,7 +193,7 @@ def settings():
             flash("You must select at least one pet-related tag.", "danger")
             return redirect(url_for("settings"))
 
-        # Update user info
+        # === Update profile info ===
         c.execute("""
             UPDATE users SET
                 display_name = ?, age = ?, location = ?, favorite_animal = ?,
@@ -186,24 +202,68 @@ def settings():
             WHERE username = ?
         """, (
             display_name, age, location, favorite_animal, dog_free_reason,
-            bio, gender, interests, main_tag, tags_string, session["username"]
+            bio, gender, interests, main_tag, tags_string, username
         ))
+
+        # === Handle gallery image uploads ===
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        for i in range(1, 6):
+            file = request.files.get(f'gallery_image_{i}')
+            if file and allowed_file(file.filename):
+                filename = secure_filename(f"{username}_gallery_{i}_{file.filename}")
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                c.execute(f"UPDATE users SET gallery_image_{i} = ? WHERE username = ?", (f'gallery/{filename}', username))
 
         conn.commit()
         conn.close()
         flash("Profile updated!", "success")
         return redirect(url_for("profile"))
 
-    # If GET, load current info
+    # === GET request: load current data ===
     c.execute("""
         SELECT display_name, age, location, favorite_animal, dog_free_reason,
                bio, gender, interests, main_tag, tags
         FROM users WHERE username = ?
-    """, (session["username"],))
+    """, (username,))
     data = c.fetchone()
     conn.close()
 
     return render_template("settings.html", data=data)
+
+@app.route("/delete_gallery_image/<int:index>", methods=["POST"])
+def delete_gallery_image(index):
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    if not 1 <= index <= 5:
+        flash("Invalid image index.", "danger")
+        return redirect(url_for("profile"))
+
+    username = session["username"]
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+
+    # Get current image path
+    c.execute(f"SELECT gallery_image_{index} FROM users WHERE username = ?", (username,))
+    result = c.fetchone()
+    image_path = result[0] if result else None
+
+    if image_path:
+        # Try to delete file
+        try:
+            os.remove(os.path.join("static", image_path))
+        except Exception as e:
+            print("Error deleting file:", e)
+
+        # Remove from DB
+        c.execute(f"UPDATE users SET gallery_image_{index} = NULL WHERE username = ?", (username,))
+        conn.commit()
+
+    conn.close()
+    flash("Photo deleted.", "success")
+    return redirect(url_for("profile"))
+
 
 
 
