@@ -2,26 +2,54 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from authlib.integrations.flask_client import OAuth
 import sqlite3
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "secret_key_here"
+app.secret_key = os.getenv("SECRET_KEY")
+
+# 🌐 Set up OAuth
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
 
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    if "username" in session:
+        return redirect(url_for("profile"))
+    return render_template("welcome.html")
+
 
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
+
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         dog_free = request.form.get("dog_free")
 
+        import re
+
+        if not re.match(r'^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$', password):
+            flash(
+                "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.",
+                "danger")
+            return redirect(url_for("signup"))
+
         if dog_free != "on":
-            return "You must agree to the Dog-Free Oath."
+            flash("You must agree to the Dog-Free Oath to join Muzzle.", "danger")
+            return redirect(url_for("signup"))
 
         # Get all form data
         display_name = request.form.get("display_name", "")
@@ -71,7 +99,7 @@ def signup():
         except sqlite3.IntegrityError:
             return "Username already exists!"
 
-    return render_template("signup.html")
+    return render_template("signup.html", username=request.form.get("username", ""))
 
 
 
@@ -90,11 +118,45 @@ def login():
         if result and check_password_hash(result[0], password):
             session["username"] = username
             return redirect(url_for("profile"))
-
         else:
-            return "Invalid username or password!"
+            flash("Invalid username or password!", "danger")
+            return render_template("login.html", username=username)
 
-    return render_template("login.html")
+    # Handle GET request
+    return render_template("login.html", username="")
+
+@app.route('/login/google')
+def google_login():
+    redirect_uri = url_for('google_callback', _external=True)
+    print("Redirect URI sent to Google:", redirect_uri)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/login/google/callback')
+def google_callback():
+    token = google.authorize_access_token()
+    user_info = google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
+    email = user_info['email']
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("SELECT username FROM users WHERE username = ?", (email,))
+    existing_user = c.fetchone()
+
+    if not existing_user:
+        # Create user using email as username
+        c.execute("""
+            INSERT INTO users (username, password)
+            VALUES (?, ?)
+        """, (email, generate_password_hash("google_oauth_login")))
+        conn.commit()
+
+    conn.close()
+    session["username"] = email
+    flash("Logged in with Google!", "success")
+    return redirect(url_for("profile"))
+
+
+
 
 @app.route("/profile")
 def profile():
