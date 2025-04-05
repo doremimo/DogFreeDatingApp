@@ -19,7 +19,9 @@ c.execute("""
         gender TEXT,
         interests TEXT,
         main_tag TEXT,
-        tags TEXT
+        tags TEXT,
+        latitude REAL,
+        longitude REAL
     )
 """)
 

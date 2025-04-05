@@ -141,9 +141,22 @@
                     <button type="submit" class="btn btn-primary w-100">🔍</button>
                 </div>
             </div>
+
         </form>
 
+                <!-- 📍 Optional Location Button -->
+        <div class="text-end mb-4">
+          <button class="btn btn-outline-primary btn-sm" onclick="requestUserLocation()">
+            📍 Use My Location for Nearby Matches
+          </button>
+          <small class="d-block text-muted mt-1">
+            We’ll never share your exact location — this just helps prioritize nearby users.
+          </small>
+        </div>
+
+
         {% if users %}
+
             <div class="row g-4">
                 {% for user, score in users %}
                     <div class="col-12">
@@ -219,6 +232,31 @@
             <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Back to Profile</a>
         </div>
     </div>
+
+<script>
+function sendLocationToServer(lat, lon) {
+    fetch("/set_location", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ latitude: lat, longitude: lon })
+    });
+}
+
+function requestUserLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            sendLocationToServer(lat, lon);
+        });
+    } else {
+        alert("Your browser doesn't support location services.");
+    }
+}
+</script>
+
 </body>
 </html>
 

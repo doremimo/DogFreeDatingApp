@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import sqlite3
@@ -265,6 +265,27 @@ def delete_gallery_image(index):
     return redirect(url_for("profile"))
 
 
+@app.route("/set_location", methods=["POST"])
+def set_location():
+    if "username" not in session:
+        return jsonify({"error": "Not logged in"}), 403
+
+    data = request.get_json()
+    lat = data.get("latitude")
+    lon = data.get("longitude")
+
+    if lat is None or lon is None:
+        return jsonify({"error": "Missing coordinates"}), 400
+
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("UPDATE users SET latitude = ?, longitude = ? WHERE username = ?", (lat, lon, session["username"]))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True})
+
+
 
 
 @app.route("/browse", methods=["GET", "POST"])
@@ -289,20 +310,38 @@ def browse():
     dealbreaker_tags = request.form.getlist("dealbreaker_tags")
     dealbreaker_tags = [tag.strip().lower() for tag in dealbreaker_tags if tag.strip()]
 
-    # Fetch all other users
+    # Fetch all other users including their coordinates
     c.execute("""
         SELECT display_name, username, age, location, favorite_animal, 
-               dog_free_reason, profile_pic, bio, gender, interests, main_tag, tags
+               dog_free_reason, profile_pic, bio, gender, interests, main_tag, tags,
+               latitude, longitude
         FROM users
         WHERE username != ?
     """, (session["username"],))
     all_users = c.fetchall()
+
+    # Get current user's coordinates
+    c.execute("SELECT latitude, longitude FROM users WHERE username = ?", (session["username"],))
+    current_coords = c.fetchone()
+    user_lat, user_lon = current_coords if current_coords else (None, None)
+
     conn.close()
 
     # Score each user
+    from math import radians, cos, sin, asin, sqrt
+
+    def haversine(lat1, lon1, lat2, lon2):
+        # Calculate great-circle distance (in km)
+        R = 6371
+        d_lat = radians(lat2 - lat1)
+        d_lon = radians(lon2 - lon1)
+        a = sin(d_lat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(d_lon / 2) ** 2
+        return R * 2 * asin(sqrt(a))
+
     def score_user(user):
         score = 0
-        display_name, username, age, loc, _, _, _, _, gender, interests, _, tags_str = user
+        (display_name, username, age, loc, _, _, _, _, gender, interests, _, tags_str,
+         lat, lon) = user
 
         if min_age and age and int(age) >= int(min_age):
             score += 1
@@ -317,14 +356,23 @@ def browse():
 
         user_tags = tags_str.lower().split(",") if tags_str else []
 
-        # 🚫 Exclude users with dealbreaker tags
         if any(tag in user_tags for tag in dealbreaker_tags):
             return -1
 
-        # ✅ Add score for matching preferred tags
         for tag in preferred_tags:
             if tag in user_tags:
                 score += 1
+
+        # 🌍 Boost score based on distance
+        if user_lat and user_lon and lat and lon:
+            try:
+                dist = haversine(float(user_lat), float(user_lon), float(lat), float(lon))
+                if dist < 20:
+                    score += 2
+                elif dist < 50:
+                    score += 1
+            except:
+                pass
 
         return score
 

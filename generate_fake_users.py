@@ -33,6 +33,18 @@ c = conn.cursor()
 # Store login credentials for testing
 credentials = []
 
+def generate_location_coords():
+    if random.random() < 0.7:  # 70% of users in Tokyo
+        # Approx Tokyo center: 35.6895° N, 139.6917° E
+        lat = round(random.uniform(35.65, 35.75), 6)
+        lon = round(random.uniform(139.65, 139.75), 6)
+    else:
+        # Random place far from Tokyo
+        lat = round(random.uniform(34.0, 36.5), 6)
+        lon = round(random.uniform(135.0, 137.5), 6)
+    return lat, lon
+
+
 # Generate and insert users
 for i in range(NUM_USERS):
     username = f"testuser{i+1:03}"
@@ -45,16 +57,22 @@ for i in range(NUM_USERS):
     gender = random.choice(genders)
     interests = ", ".join(random.sample(interests_pool, k=random.randint(2, 4)))
     bio = fake.sentence(nb_words=12)
+    base_lat = 35.6804
+    base_lon = 139.7690
+    lat = base_lat + random.uniform(-0.1, 0.1)
+    lon = base_lon + random.uniform(-0.1, 0.1)
 
     try:
         c.execute("""
-                INSERT INTO users (
-                    username, password, display_name, age, location, favorite_animal,
-                    dog_free_reason, profile_pic, bio, gender, interests
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
+                   INSERT INTO users (
+                       username, password, display_name, age, location, favorite_animal,
+                       dog_free_reason, profile_pic, bio, gender, interests,
+                       latitude, longitude
+                   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               """, (
             username, hashed_password, display_name, age, location, favorite_animal,
-            dog_free_reason, profile_pic, bio, gender, interests
+            dog_free_reason, profile_pic, bio, gender, interests,
+            lat, lon
         ))
         credentials.append([username, password])
     except sqlite3.IntegrityError:
